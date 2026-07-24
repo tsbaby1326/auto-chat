@@ -6,7 +6,7 @@ A React chat app where **AutoBot** replies automatically.
 
 ```bash
 npm install
-npm run dev
+npm run dev -- --host 127.0.0.1 --port 5173
 ```
 
 Open the local URL Vite prints (usually `http://localhost:5173`).
