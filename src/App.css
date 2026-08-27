@@ -46,7 +46,86 @@
 }
 
 .brand {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
   animation: rise 0.7s ease both;
+}
+
+.status {
+  margin: 0 0 0.15rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--bot);
+  white-space: nowrap;
+}
+
+.status-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: #2f9d6a;
+  box-shadow: 0 0 0 4px rgba(47, 157, 106, 0.18);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1.1rem 0;
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+
+.ghost {
+  border: 1px solid rgba(26, 77, 62, 0.18);
+  background: transparent;
+  color: var(--bot);
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ghost:hover {
+  background: var(--bot-soft);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  padding: 0 1rem 0.35rem;
+}
+
+.chip {
+  border: 1px solid rgba(26, 77, 62, 0.16);
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--bot);
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.chip:hover:not(:disabled) {
+  background: var(--bot-soft);
+}
+
+.chip:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .logo {
@@ -105,12 +184,22 @@
 }
 
 .who {
-  display: block;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   opacity: 0.72;
+}
+
+.who time {
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  opacity: 0.85;
 }
 
 .bubble.bot {
@@ -260,6 +349,11 @@
 @media (max-width: 520px) {
   .stage {
     width: calc(100% - 1.25rem);
+  }
+
+  .brand {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .composer {

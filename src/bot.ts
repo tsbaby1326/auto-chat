@@ -7,13 +7,27 @@ export type Message = {
   createdAt: number
 }
 
+export type RuleId =
+  | 'greeting'
+  | 'status'
+  | 'thanks'
+  | 'bye'
+  | 'help'
+  | 'time'
+  | 'date'
+  | 'weather'
+  | 'name'
+  | 'joke'
+
 type Rule = {
+  id: RuleId
   match: RegExp
   replies: string[]
 }
 
 const rules: Rule[] = [
   {
+    id: 'greeting',
     match: /\b(hi|hello|hey|yo|howdy)\b/i,
     replies: [
       'Hey there — glad you stopped by. What’s on your mind?',
@@ -22,6 +36,7 @@ const rules: Rule[] = [
     ],
   },
   {
+    id: 'status',
     match: /\b(how are you|how's it going|how r u)\b/i,
     replies: [
       'Running smooth on this end. How about you?',
@@ -29,6 +44,7 @@ const rules: Rule[] = [
     ],
   },
   {
+    id: 'thanks',
     match: /\b(thank|thanks|thx)\b/i,
     replies: [
       'Anytime.',
@@ -37,6 +53,7 @@ const rules: Rule[] = [
     ],
   },
   {
+    id: 'bye',
     match: /\b(bye|goodbye|see you|later)\b/i,
     replies: [
       'Catch you later.',
@@ -45,25 +62,25 @@ const rules: Rule[] = [
     ],
   },
   {
+    id: 'help',
     match: /\b(help|what can you do|commands)\b/i,
     replies: [
-      'I reply automatically to whatever you type. Try a greeting, ask about the weather, the time, or just chat.',
-      'I’m a simple auto-reply bot — keyword-aware replies with a bit of personality. No account needed.',
+      'I reply automatically. Try a greeting, ask for the time or date, request a joke, or tap a suggestion chip.',
+      'I’m a keyword-aware auto-reply bot. No account, no API key — replies stay on your device.',
     ],
   },
   {
+    id: 'time',
     match: /\b(time|clock)\b/i,
-    replies: [
-      `It’s ${new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })} on your device.`,
-    ],
+    replies: [],
   },
   {
-    match: /\b(date|today|day)\b/i,
-    replies: [
-      `Today is ${new Date().toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' })}.`,
-    ],
+    id: 'date',
+    match: /\b(date|today)\b/i,
+    replies: [],
   },
   {
+    id: 'weather',
     match: /\b(weather|rain|sunny|forecast)\b/i,
     replies: [
       'I don’t have live weather yet — but I’m optimistic it’s a good day for chatting.',
@@ -71,6 +88,7 @@ const rules: Rule[] = [
     ],
   },
   {
+    id: 'name',
     match: /\b(name|who are you|what are you)\b/i,
     replies: [
       'I’m AutoBot — the auto-reply side of AutoChat.',
@@ -78,6 +96,7 @@ const rules: Rule[] = [
     ],
   },
   {
+    id: 'joke',
     match: /\b(joke|funny|laugh)\b/i,
     replies: [
       'Why did the developer go broke? Because they used up all their cache.',
@@ -99,23 +118,33 @@ function pick<T>(items: T[]): T {
   return items[Math.floor(Math.random() * items.length)]!
 }
 
-export function getBotReply(userText: string): string {
+export function formatClock(now = new Date()): string {
+  return now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+}
+
+export function formatCalendar(now = new Date()): string {
+  return now.toLocaleDateString([], {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+  })
+}
+
+export function getBotReply(userText: string, now = new Date()): string {
   const trimmed = userText.trim()
   if (!trimmed) {
     return 'Say something and I’ll reply right away.'
   }
 
   for (const rule of rules) {
-    if (rule.match.test(trimmed)) {
-      // Re-evaluate time/date rules so they stay fresh
-      if (rule.match.source.includes('time')) {
-        return `It’s ${new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })} on your device.`
-      }
-      if (rule.match.source.includes('date')) {
-        return `Today is ${new Date().toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' })}.`
-      }
-      return pick(rule.replies)
+    if (!rule.match.test(trimmed)) continue
+    if (rule.id === 'time') {
+      return `It’s ${formatClock(now)} on your device.`
     }
+    if (rule.id === 'date') {
+      return `Today is ${formatCalendar(now)}.`
+    }
+    return pick(rule.replies)
   }
 
   if (/\?$/.test(trimmed)) {
@@ -134,3 +163,5 @@ export function delayForReply(text: string): number {
   const extra = Math.min(text.length * 12, 900)
   return base + extra + Math.floor(Math.random() * 250)
 }
+
+export const SUGGESTIONS = ['hello', 'what can you do', 'tell me a joke', 'what time is it'] as const

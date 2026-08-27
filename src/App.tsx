@@ -1,6 +1,13 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
-import { delayForReply, getBotReply, type Message } from './bot'
+import {
+  delayForReply,
+  getBotReply,
+  SUGGESTIONS,
+  type Message,
+} from './bot'
 import './App.css'
+
+const STORAGE_KEY = 'autochat.messages.v1'
 
 function createId() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
@@ -9,17 +16,37 @@ function createId() {
 const welcome: Message = {
   id: 'welcome',
   role: 'bot',
-  text: 'Hi — I’m AutoBot. Send a message and I’ll reply on my own.',
+  text: 'Hi — I’m AutoBot. Send a message and I’ll reply on my own. Your chat stays in this browser.',
   createdAt: Date.now(),
 }
 
+function loadMessages(): Message[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (!raw) return [welcome]
+    const parsed = JSON.parse(raw) as Message[]
+    if (!Array.isArray(parsed) || parsed.length === 0) return [welcome]
+    return parsed
+  } catch {
+    return [welcome]
+  }
+}
+
+function formatStamp(ms: number) {
+  return new Date(ms).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+}
+
 export default function App() {
-  const [messages, setMessages] = useState<Message[]>([welcome])
+  const [messages, setMessages] = useState<Message[]>(loadMessages)
   const [draft, setDraft] = useState('')
   const [typing, setTyping] = useState(false)
   const listRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const replyTimer = useRef<number | null>(null)
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(messages))
+  }, [messages])
 
   useEffect(() => {
     const el = listRef.current
@@ -35,8 +62,8 @@ export default function App() {
     }
   }, [])
 
-  function sendMessage() {
-    const text = draft.trim()
+  function sendMessage(raw?: string) {
+    const text = (raw ?? draft).trim()
     if (!text || typing) return
 
     const userMessage: Message = {
@@ -68,6 +95,23 @@ export default function App() {
     }, wait)
   }
 
+  function clearChat() {
+    if (replyTimer.current !== null) {
+      window.clearTimeout(replyTimer.current)
+      replyTimer.current = null
+    }
+    setTyping(false)
+    setMessages([
+      {
+        ...welcome,
+        id: createId(),
+        createdAt: Date.now(),
+        text: 'Chat cleared. I’m still here — send a new message whenever you like.',
+      },
+    ])
+    inputRef.current?.focus()
+  }
+
   function onKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
@@ -82,19 +126,33 @@ export default function App() {
 
       <main className="stage">
         <header className="brand">
-          <p className="logo">AutoChat</p>
-          <p className="tagline">Type anything — replies land on their own.</p>
+          <div>
+            <p className="logo">AutoChat</p>
+            <p className="tagline">Type anything — replies land on their own.</p>
+          </div>
+          <p className="status">
+            <span className="status-dot" aria-hidden="true" />
+            AutoBot online
+          </p>
         </header>
 
         <section className="chat" aria-label="Chat conversation">
+          <div className="toolbar">
+            <p className="hint">Local demo — no accounts, no network calls.</p>
+            <button type="button" className="ghost" onClick={clearChat}>
+              Clear chat
+            </button>
+          </div>
+
           <div className="thread" ref={listRef} role="log" aria-live="polite">
             {messages.map((message) => (
-              <article
-                key={message.id}
-                className={`bubble ${message.role}`}
-                style={{ animationDelay: '0ms' }}
-              >
-                <span className="who">{message.role === 'bot' ? 'AutoBot' : 'You'}</span>
+              <article key={message.id} className={`bubble ${message.role}`}>
+                <span className="who">
+                  {message.role === 'bot' ? 'AutoBot' : 'You'}
+                  <time dateTime={new Date(message.createdAt).toISOString()}>
+                    {formatStamp(message.createdAt)}
+                  </time>
+                </span>
                 <p>{message.text}</p>
               </article>
             ))}
@@ -109,6 +167,20 @@ export default function App() {
                 </div>
               </div>
             )}
+          </div>
+
+          <div className="chips" aria-label="Suggested messages">
+            {SUGGESTIONS.map((suggestion) => (
+              <button
+                key={suggestion}
+                type="button"
+                className="chip"
+                disabled={typing}
+                onClick={() => sendMessage(suggestion)}
+              >
+                {suggestion}
+              </button>
+            ))}
           </div>
 
           <form
