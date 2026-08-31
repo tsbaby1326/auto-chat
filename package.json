@@ -2,6 +2,7 @@
   "name": "auto-chat",
   "private": true,
   "version": "0.0.1",
+  "homepage": "https://tsbaby1326.github.io/auto-chat/",
   "type": "module",
   "scripts": {
     "dev": "vite",
