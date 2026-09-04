@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import {
   delayForReply,
+  formatTranscript,
   getBotReply,
   SUGGESTIONS,
   type Message,
@@ -39,7 +40,7 @@ function formatStamp(ms: number) {
 export default function App() {
   const [messages, setMessages] = useState<Message[]>(loadMessages)
   const [draft, setDraft] = useState('')
-  const [typing, setTyping] = useState(false)
+  const [copied, setCopied] = useState(false)
   const listRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const replyTimer = useRef<number | null>(null)
@@ -112,6 +113,18 @@ export default function App() {
     inputRef.current?.focus()
   }
 
+  async function copyTranscript() {
+    const text = formatTranscript(messages)
+    try {
+      await navigator.clipboard.writeText(text)
+    } catch {
+      window.prompt('Copy this transcript:', text)
+      return
+    }
+    setCopied(true)
+    window.setTimeout(() => setCopied(false), 1600)
+  }
+
   function onKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
@@ -139,9 +152,14 @@ export default function App() {
         <section className="chat" aria-label="Chat conversation">
           <div className="toolbar">
             <p className="hint">Local demo — no accounts, no network calls.</p>
-            <button type="button" className="ghost" onClick={clearChat}>
-              Clear chat
-            </button>
+            <div className="toolbar-actions">
+              <button type="button" className="ghost" onClick={copyTranscript}>
+                {copied ? 'Copied' : 'Copy chat'}
+              </button>
+              <button type="button" className="ghost" onClick={clearChat}>
+                Clear chat
+              </button>
+            </div>
           </div>
 
           <div className="thread" ref={listRef} role="log" aria-live="polite">

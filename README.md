@@ -11,6 +11,7 @@ A small React demo where **AutoBot** replies on its own. No accounts, no API key
 - Auto-replies with a short typing delay
 - Suggestions for greetings, help, jokes, and time
 - Conversation stays in this browser until you clear it
+- Copy the thread as plain text
 - Enter to send, Shift+Enter for a new line
 
 ## Run
