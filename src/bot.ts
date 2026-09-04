@@ -164,4 +164,13 @@ export function delayForReply(text: string): number {
   return base + extra + Math.floor(Math.random() * 250)
 }
 
+export function formatTranscript(messages: Message[]): string {
+  return messages
+    .map((message) => {
+      const who = message.role === 'bot' ? 'AutoBot' : 'You'
+      return `${who} (${formatClock(new Date(message.createdAt))}): ${message.text}`
+    })
+    .join('\n')
+}
+
 export const SUGGESTIONS = ['hello', 'what can you do', 'tell me a joke', 'what time is it'] as const

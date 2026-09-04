@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatCalendar, formatClock, getBotReply } from './bot'
+import { formatCalendar, formatClock, formatTranscript, getBotReply } from './bot'
 
 describe('getBotReply', () => {
   it('asks for a message when the input is empty', () => {
@@ -28,5 +28,15 @@ describe('getBotReply', () => {
   it('does not treat the word day alone as a date question', () => {
     const reply = getBotReply('I had a long day')
     expect(reply).not.toMatch(/^Today is /)
+  })
+
+  it('formats a transcript with speakers and times', () => {
+    const at = new Date('2026-08-26T17:48:00').getTime()
+    const text = formatTranscript([
+      { id: '1', role: 'user', text: 'hello', createdAt: at },
+      { id: '2', role: 'bot', text: 'Hi! Ready when you are.', createdAt: at },
+    ])
+    expect(text).toContain(`You (${formatClock(new Date(at))}): hello`)
+    expect(text).toContain(`AutoBot (${formatClock(new Date(at))}): Hi! Ready when you are.`)
   })
 })
