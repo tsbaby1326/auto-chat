@@ -2,6 +2,8 @@
 
 A small React demo where **AutoBot** replies on its own. No accounts, no API keys, and no network calls — keyword replies run in the browser, and the thread is saved in `localStorage`.
 
+**Live demo:** [tsbaby1326.github.io/auto-chat](https://tsbaby1326.github.io/auto-chat/)
+
 [![CI](https://github.com/tsbaby1326/auto-chat/actions/workflows/ci.yml/badge.svg)](https://github.com/tsbaby1326/auto-chat/actions/workflows/ci.yml)
 
 ## Features
